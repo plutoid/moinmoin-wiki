@@ -1,0 +1,98 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: moinmoin
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: moin-pv
+    namespace: moinmoin
+spec:
+    capacity:
+      storage: 8Gi
+    accessModes:
+      - ReadWriteOnce
+    persistentVolumeReclaimPolicy: Recycle
+    nfs:
+      path: /opt/data
+      server: n1
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: moinmoin-pvc
+  namespace: moinmoin
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: moinmoin
+  namespace: moinmoin
+  labels:
+    app: moinmoin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: moinmoin
+  template:
+    metadata:
+      labels:
+        app: moinmoin
+    spec:
+      volumes:
+        - name: moinmoin-vol
+          persistentVolumeClaim:
+            claimName: moinmoin-pvc
+      containers:
+      - name: moinmoin
+        image: tianhua/moinwiki:20190516
+        env:
+          - name: NOSSL
+            value: "1"
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+          - name: moinmoin-vol
+            mountPath: /usr/local/share/moin
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: moinmoin-lb
+  labels:
+    app: moinmoin
+  namespace: moinmoin
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: moinmoin
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: moin-ing
+  namespace: moinmoin
+spec:
+  rules:
+  - host: udlr.xyz
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: moinmoin
+          servicePort: 80
