@@ -94,5 +94,5 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: moinmoin
+          serviceName: moinmoin-lb
           servicePort: 80
