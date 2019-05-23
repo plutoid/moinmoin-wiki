@@ -27,3 +27,9 @@ If you do not need HTTPS you can disable it by passing the -e NOSSL environment 
 
 Pull requests are very welcome.
 
+### remember configure esstional language packages 
+follow link and click install
+
+http://url.com/ction/language_setup/LanguageSetup?action=language_setup&target=English--all_pages.zip&language=English
+
+### set right for user properly otherwise you have no right to edit the page :)
